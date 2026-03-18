@@ -1,0 +1,11 @@
+Django==4.2.0
+mysqlclient==2.2.0
+Pillow==10.0.0
+python-dotenv==1.0.0
+
+# Development dependencies
+pytest==7.4.0
+pytest-django==4.7.0
+coverage==7.3.2
+black==23.9.0
+flake8==6.1.0
