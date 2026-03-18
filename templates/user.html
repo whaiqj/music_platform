@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账户设置 - MusicStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 新增的导航按钮容器 */
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .auth-buttons .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        /* 活跃按钮样式（登录/注册或登出） */
+        .btn-active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: #ffffff;
+            border: none;
+        }
+
+        /* 不活跃按钮样式（“标黑”） */
+        .btn-inactive {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 统一的页面布局和卡片样式 */
+        .main-content {
+            padding: 2rem;
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .page-header {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .content-card {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .card-title i {
+            margin-right: 0.5rem;
+            color: #4ecdc4;
+        }
+
+        .user-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .user-info-value {
+            font-weight: 500;
+        }
+
+        /* 登出按钮样式 */
+        .btn-logout {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        /* 登录/注册卡片样式 */
+        .auth-card {
+            text-align: center;
+        }
+
+        .auth-card .card-title {
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-card .auth-btns-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">
+            <i class="fas fa-music"></i>
+            MusicStream
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1 class="page-title">账户设置</h1>
+            <p class="page-subtitle">管理您的个人资料和账户安全</p>
+        </header>
+
+        <section id="logged-in-state">
+            <div class="content-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-user-circle"></i>
+                        账户信息
+                    </div>
+                </div>
+                <div class="info-list">
+                    <div class="user-info-item">
+                        <span class="user-info-label">账户名</span>
+                        <span class="user-info-value">{{ user.username }}</span>
+                    </div>
+                    <div class="user-info-item">
+                        <span class="user-info-label">邮箱</span>
+                        <span class="user-info-value">{{ user.email }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-logout btn-active">
+            登出
+        </button>
+    </form>
+</div>
+
+        </section>
+
+        <section id="logged-out-state" style="display: none;">
+            <div class="content-card auth-card">
+                <h2 class="card-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    您尚未登录
+                </h2>
+                <p style="color: rgba(255, 255, 255, 0.7);">请登录或注册以管理您的账户。</p>
+                <div class="auth-btns-container">
+                    <a href="#" class="btn btn-active">登录</a>
+                    <a href="#" class="btn btn-active">注册</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

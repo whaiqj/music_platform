@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索结果 - MusicStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 - 保持与之前文件一致 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-container {
+            position: relative;
+            width: 400px;
+            max-width: 50%;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-breadcrumb {
+            flex: 1;
+            margin-left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .breadcrumb-item {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #4ecdc4;
+        }
+
+        .breadcrumb-item.active {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            padding: 2rem;
+            margin-top: 60px;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .search-info {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        .search-info span {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        /* 搜索结果 */
+        .search-results {
+            margin-top: 2rem;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .song-cover {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin-right: 1rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .song-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .song-info {
+            flex-grow: 1;
+        }
+
+        .song-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .song-artist {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .song-meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 0.25rem;
+        }
+
+        .song-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .play-button, .action-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .action-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* 无结果提示 */
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .search-container {
+                width: 200px;
+                max-width: 30%;
+            }
+
+            .result-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .song-cover {
+                width: 100%;
+                height: 150px;
+                margin-bottom: 1rem;
+                border-radius: 8px;
+            }
+
+            .song-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo" onclick="window.location.href='/'">
+            <i class="fas fa-music"></i>
+            MusicStream
+        </div>
+
+        <!-- 找到 search.html 中搜索容器的 form 标签，修改 action 属性 -->
+<div class="search-container">
+    <!-- 关键修复：用 {% url 'search' page=1 %} 生成符合路由规则的地址 -->
+    <form id="search-form" action="{% url 'search' page=1 %}" method="get">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" name="keyword"
+               placeholder="搜索歌曲、艺术家或专辑..."
+               value="{{ keyword|default:'' }}">
+    </form>
+</div>
+
+        <div class="nav-breadcrumb">
+            <a href="/" class="breadcrumb-item">首页</a>
+            <i class="fas fa-chevron-right"></i>
+            <span class="breadcrumb-item active">搜索结果</span>
+        </div>
+
+        <div class="user-menu">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="page-header">
+            <h1 class="page-title">搜索结果</h1>
+            {% if keyword %}
+            <p class="search-info">
+                找到 <span>{{ search_count }}</span> 首关于 "<span>{{ keyword }}</span>" 的歌曲
+            </p>
+            {% endif %}
+        </section>
+
+        <section class="search-results">
+    {% if keyword %}
+        <!-- 【关键修复2】判断分页数据是否有内容，而非判断原始songs -->
+        {% if pages.object_list %}
+            <!-- 循环分页后的当前页数据：pages.object_list -->
+            {% for song in pages.object_list %}
+            <div class="result-item">
+                <div class="song-cover">
+                    {% if song.img %}
+                    <img src="{{ song.img.url }}" alt="{{ song.name }}">
+                    {% else %}
+                    <i class="fas fa-music" style="font-size: 1.5rem; color: rgba(255,255,255,0.5); padding: 1.2rem;"></i>
+                    {% endif %}
+                </div>
+                <div class="song-info">
+                    <div class="song-title">{{ song.name }}</div>
+                    <div class="song-artist">{{ song.singer }}</div>
+                    <div class="song-meta">
+                        {% if song.album %}专辑: {{ song.album }}{% endif %}
+                    </div>
+                </div>
+                <div class="song-actions">
+                    <button class="play-button"
+                            onclick="playSong('{{ song.file.url }}', '{{ song.name }}', '{{ song.singer }}', '{% if song.img %}{{ song.img.url }}{% endif %}', '{{ song.id }}')">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="action-button">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 【新增】分页导航（确保多页结果能切换，避免只显示5首） -->
+            <div style="text-align: center; margin-top: 2rem; color: rgba(255,255,255,0.7);">
+                {% if pages.has_previous %}
+                    <a href="{% url 'search' page=pages.previous_page_number %}?keyword={{ keyword }}"
+                       style="color: #4ecdc4; margin-right: 1rem; text-decoration: none;">
+                        上一页
+                    </a>
+                {% endif %}
+                <span>第 {{ pages.number }} 页 / 共 {{ pages.paginator.num_pages }} 页</span>
+                {% if pages.has_next %}
+                    <a href="{% url 'search' page=pages.next_page_number %}?keyword={{ keyword }}"
+                       style="color: #4ecdc4; margin-left: 1rem; text-decoration: none;">
+                        下一页
+                    </a>
+                {% endif %}
+            </div>
+
+        {% else %}
+            <!-- 有关键词但无结果 -->
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>抱歉，没有找到相关歌曲</h3>
+                <p>请尝试使用其他关键词搜索</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- 无关键词时的提示 -->
+        <div class="no-results">
+            <i class="fas fa-music"></i>
+            <h3>请输入关键词开始搜索</h3>
+            <p>在上方搜索框中输入歌曲名、艺术家或专辑名</p>
+        </div>
+    {% endif %}
+</section>
+    </main>
+
+    <script>
+        // 搜索功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.querySelector('.search-input');
+
+            // 回车搜索
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            // 点击搜索图标搜索
+            document.querySelector('.search-icon').addEventListener('click', function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            function performSearch() {
+                const keyword = searchInput.value.trim();
+                if (keyword) {
+                    searchForm.submit();
+                }
+            }
+
+            // 播放歌曲功能
+            window.playSong = function(songUrl, title, artist, imgSrc, songId) {
+                if (songUrl) {
+                    // 这里可以集成完整的播放器功能
+                    const audio = new Audio(songUrl);
+                    audio.play()
+                        .then(() => {
+                            console.log('正在播放:', title);
+                        })
+                        .catch(error => {
+                            console.error('播放失败:', error);
+                            alert('播放失败，请稍后重试');
+                        });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

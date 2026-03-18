@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面未找到 - MusicStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 主要内容 */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        /* 404图形 */
+        .error-graphic {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 3rem;
+        }
+
+        .vinyl {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #0f0f23, #1a1a2e);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1),
+                        0 0 0 20px rgba(78, 205, 196, 0.2),
+                        0 0 0 30px rgba(255, 107, 107, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            animation: rotate 20s linear infinite;
+        }
+
+        .vinyl::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .vinyl::after {
+            content: '';
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background: repeating-radial-gradient(
+                circle at center,
+                transparent 0,
+                transparent 4px,
+                rgba(255, 255, 255, 0.1) 4px,
+                rgba(255, 255, 255, 0.1) 6px
+            );
+            border-radius: 50%;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 10rem;
+            font-weight: 800;
+            z-index: 3;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .number-4 {
+            top: 0;
+            left: 0;
+            transform: translate(-30%, -30%);
+        }
+
+        .number-0 {
+            top: 0;
+            right: 0;
+            transform: translate(30%, -30%);
+        }
+
+        .number-4-second {
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 30%);
+        }
+
+        /* 错误信息 */
+        .error-message {
+            margin-bottom: 2rem;
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .error-description {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* 动画 */
+        @keyframes rotate {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .number {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .number-4 {
+            animation-delay: 0s;
+        }
+
+        .number-0 {
+            animation-delay: 0.5s;
+        }
+
+        .number-4-second {
+            animation-delay: 1s;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .error-graphic {
+                width: 250px;
+                height: 250px;
+            }
+
+            .vinyl {
+                width: 150px;
+                height: 150px;
+            }
+
+            .vinyl::after {
+                width: 130px;
+                height: 130px;
+            }
+
+            .number {
+                font-size: 8rem;
+            }
+
+            .error-title {
+                font-size: 2rem;
+            }
+
+            .error-description {
+                font-size: 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-graphic {
+                width: 200px;
+                height: 200px;
+            }
+
+            .vinyl {
+                width: 120px;
+                height: 120px;
+            }
+
+            .vinyl::after {
+                width: 100px;
+                height: 100px;
+            }
+
+            .number {
+                font-size: 6rem;
+            }
+
+            .error-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* 底部装饰 */
+        .decoration {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            opacity: 0.5;
+        }
+
+        .music-notes {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .note {
+            font-size: 1.5rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .note:nth-child(1) { animation-delay: 0s; color: #ff6b6b; }
+        .note:nth-child(2) { animation-delay: 0.2s; color: #4ecdc4; }
+        .note:nth-child(3) { animation-delay: 0.4s; color: #ff6b6b; }
+        .note:nth-child(4) { animation-delay: 0.6s; color: #4ecdc4; }
+        .note:nth-child(5) { animation-delay: 0.8s; color: #ff6b6b; }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="logo" onclick="goHome()">
+            <i class="fas fa-music"></i>
+            MusicStream
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <!-- 404图形 -->
+        <div class="error-graphic">
+            <div class="vinyl"></div>
+            <div class="number number-4">4</div>
+            <div class="number number-0">0</div>
+            <div class="number number-4-second">4</div>
+        </div>
+
+        <!-- 错误信息 -->
+        <div class="error-message">
+            <h1 class="error-title">页面未找到</h1>
+            <p class="error-description">
+                抱歉，您访问的页面不存在或已被移除。<br>
+                请检查URL是否正确，或返回首页继续浏览。
+            </p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <a href="{% url 'index' %}"><div class="action-buttons">
+            <button class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                返回首页
+            </button>
+        </div></a>
+    </div>
+
+    <!-- 底部装饰 -->
+    <div class="decoration">
+        <div class="music-notes">
+            <div class="note">♪</div>
+            <div class="note">♫</div>
+            <div class="note">♩</div>
+            <div class="note">♬</div>
+            <div class="note">♪</div>
+        </div>
+    </div>
+
+
+</body>
+</html>

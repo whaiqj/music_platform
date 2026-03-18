@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最近播放 - MusicStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-breadcrumb {
+            flex: 1;
+            margin-left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .breadcrumb-item {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #4ecdc4;
+        }
+
+        .breadcrumb-item.active {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        /* 主要布局 */
+        .main-layout {
+            display: flex;
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 240px;
+            height: calc(100vh - 60px);
+            background: rgba(15, 15, 35, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 2rem 1rem;
+            position: fixed;
+            left: 0;
+            top: 60px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            margin-bottom: 0.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(78, 205, 196, 0.2));
+            color: #ffffff;
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 2rem;
+        }
+
+        /* 页面头部 */
+        .page-header {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        }
+
+        .album-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .album-cover {
+            width: 180px;
+            height: 180px;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .album-cover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(78, 205, 196, 0.3), rgba(255, 107, 107, 0.3));
+        }
+
+        .album-details h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .album-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .play-all-btn {
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .play-all-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(78, 205, 196, 0.4);
+        }
+
+        .clear-history-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clear-history-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        /* 歌曲列表 */
+        .songs-list {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .list-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr 100px 100px 80px;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* 歌曲项 */
+        .song-item {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr 100px 100px 80px;
+            align-items: center;
+            padding: 1rem 2rem;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .song-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .song-item:last-child {
+            border-bottom: none;
+        }
+
+        .song-number {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .song-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .song-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .song-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .song-title {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-album {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-duration {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .play-time {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .song-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+            color: white;
+            opacity: 0;
+        }
+
+        .song-item:hover .play-button {
+            opacity: 1;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .list-header, .song-item {
+                grid-template-columns: 40px 1fr 100px 80px;
+            }
+
+            .song-album, .play-time {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .album-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .album-cover {
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+
+            .album-details h1 {
+                font-size: 2rem;
+            }
+
+            .list-header, .song-item {
+                grid-template-columns: 30px 1fr 60px;
+                padding: 0.8rem 1rem;
+            }
+
+            .song-cover {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .song-album, .song-duration, .play-time {
+                display: none;
+            }
+
+            .play-button {
+                opacity: 1;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .song-item {
+            animation: slideUp 0.3s ease;
+        }
+
+        .song-item:nth-child(1) { animation-delay: 0.1s; }
+        .song-item:nth-child(2) { animation-delay: 0.2s; }
+        .song-item:nth-child(3) { animation-delay: 0.3s; }
+        .song-item:nth-child(4) { animation-delay: 0.4s; }
+        .song-item:nth-child(5) { animation-delay: 0.5s; }
+        .song-item:nth-child(6) { animation-delay: 0.6s; }
+        .song-item:nth-child(7) { animation-delay: 0.7s; }
+        .song-item:nth-child(8) { animation-delay: 0.8s; }
+        .song-item:nth-child(9) { animation-delay: 0.9s; }
+        .song-item:nth-child(10) { animation-delay: 1.0s; }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="logo" onclick="goHome()">
+            <i class="fas fa-music"></i>
+            MusicStream
+        </div>
+
+        <div class="nav-breadcrumb">
+            <a href="#" class="breadcrumb-item" onclick="goHome()">首页</a>
+            <i class="fas fa-chevron-right"></i>
+            <span class="breadcrumb-item active">最近播放</span>
+        </div>
+
+        <div class="user-menu">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="nav-section">
+                <div class="nav-title">发现</div>
+                <div class="nav-item" onclick="goHome()">
+                    <i class="fas fa-home"></i>
+                    首页
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-compass"></i>
+                    浏览
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    排行榜
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">我的音乐</div>
+                <div class="nav-item">
+                    <i class="fas fa-heart"></i>
+                    我喜欢的
+                </div>
+                <div class="nav-item active">
+                    <i class="fas fa-clock"></i>
+                    最近播放
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-download"></i>
+                    已下载
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">播放列表</div>
+                <div class="nav-item">
+                    <i class="fas fa-plus"></i>
+                    创建播放列表
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-list"></i>
+                    我的歌单 #1
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-list"></i>
+                    跑步音乐
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 页面头部 -->
+            <section class="page-header">
+                <div class="album-info">
+                    <div class="album-cover">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="album-details">
+                        <h1>最近播放</h1>
+                        <div class="album-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>MusicStream用户</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-music"></i>
+                                <span>12首歌曲</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>最近更新: 今天 14:30</span>
+                            </div>
+                        </div>
+                        <button class="play-all-btn" onclick="playAll()">
+                            <i class="fas fa-play"></i>
+                            播放全部
+                        </button>
+                        <button class="clear-history-btn" onclick="clearHistory()">
+                            <i class="fas fa-trash-alt"></i>
+                            清除播放记录
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 歌曲列表 -->
+            <section class="songs-list">
+                <div class="list-header">
+                    <div>#</div>
+                    <div>歌曲标题</div>
+                    <div class="song-album">专辑</div>
+                    <div class="song-duration">时长</div>
+                    <div class="play-time">播放时间</div>
+                    <div></div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">1</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-music"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">稻香</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">魔杰座</div>
+                    <div class="song-duration">3:42</div>
+                    <div class="play-time">今天 14:25</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">2</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-heart"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">晴天</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">叶惠美</div>
+                    <div class="song-duration">4:29</div>
+                    <div class="play-time">今天 14:10</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">3</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-star"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">青花瓷</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">我很忙</div>
+                    <div class="song-duration">3:59</div>
+                    <div class="play-time">今天 13:45</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">4</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-guitar"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">夜曲</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">十一月的萧邦</div>
+                    <div class="song-duration">4:18</div>
+                    <div class="play-time">今天 13:20</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">5</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-moon"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">告白气球</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">周杰伦的床边故事</div>
+                    <div class="song-duration">3:35</div>
+                    <div class="play-time">今天 12:55</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">6</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-bolt"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">最伟大的作品</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">最伟大的作品</div>
+                    <div class="song-duration">4:04</div>
+                    <div class="play-time">今天 12:30</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">7</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-feather"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">粉色海洋</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">最伟大的作品</div>
+                    <div class="song-duration">3:06</div>
+                    <div class="play-time">今天 12:05</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">8</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-magic"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">倒影</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">最伟大的作品</div>
+                    <div class="song-duration">3:54</div>
+                    <div class="play-time">今天 11:40</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">9</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-gem"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">红颜如霜</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">最伟大的作品</div>
+                    <div class="song-duration">4:17</div>
+                    <div class="play-time">今天 11:15</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">10</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-seedling"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">不爱我就拉倒</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">不爱我就拉倒</div>
+                    <div class="song-duration">4:08</div>
+                    <div class="play-time">今天 10:50</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">11</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-umbrella"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">雨下一整晚</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">跨时代</div>
+                    <div class="song-duration">4:14</div>
+                    <div class="play-time">今天 10:25</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="song-item">
+                    <div class="song-number">12</div>
+                    <div class="song-info">
+                        <div class="song-cover"><i class="fas fa-dragon"></i></div>
+                        <div class="song-details">
+                            <div class="song-title">龙拳</div>
+                            <div class="song-artist">周杰伦</div>
+                        </div>
+                    </div>
+                    <div class="song-album">八度空间</div>
+                    <div class="song-duration">4:32</div>
+                    <div class="play-time">今天 10:00</div>
+                    <div class="song-actions">
+                        <button class="action-button">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="action-button play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 页面交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏导航切换
+            const navItems = document.querySelectorAll('.sidebar .nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (this.classList.contains('active')) return;
+
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const tab = this.dataset.tab;
+                    if (tab) {
+                        switchTab(tab);
+                    }
+                });
+            });
+
+            // 播放按钮事件
+            const playButtons = document.querySelectorAll('.play-button');
+            playButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const songItem = this.closest('.song-item');
+                    const songTitle = songItem.querySelector('.song-title').textContent;
+                    const artistName = songItem.querySelector('.song-artist').textContent;
+
+                    playMusic(songTitle, artistName);
+                });
+            });
+
+            // 歌曲项点击事件
+            const songItems = document.querySelectorAll('.song-item');
+            songItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const songTitle = this.querySelector('.song-title').textContent;
+                    const artistName = this.querySelector('.song-artist').textContent;
+
+                    playMusic(songTitle, artistName);
+                });
+            });
+
+            // 爱心按钮事件
+            const heartButtons = document.querySelectorAll('.action-button:not(.play-button)');
+            heartButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const icon = this.querySelector('i');
+
+                    if (icon.classList.contains('fa-heart')) {
+                        if (icon.style.color === 'rgb(255, 107, 107)') {
+                            icon.style.color = 'rgba(255, 255, 255, 0.6)';
+                            showNotification('已从"我喜欢的"中移除');
+                        } else {
+                            icon.style.color = '#ff6b6b';
+                            showNotification('已添加到"我喜欢的"');
+                        }
+                    }
+                });
+            });
+        });
+
+        // 播放音乐
+        function playMusic(title, artist) {
+            console.log('播放音乐:', title, 'by', artist);
+
+            // 这里可以集成实际的音乐播放器
+            alert(`正在播放: ${title} - ${artist}`);
+        }
+
+        // 播放全部
+        function playAll() {
+            console.log('播放全部最近播放的歌曲');
+            alert('开始播放所有最近播放的歌曲');
+        }
+
+        // 清除播放记录
+        function clearHistory() {
+            if (confirm('确定要清除所有播放记录吗？此操作不可撤销。')) {
+                const songItems = document.querySelectorAll('.song-item');
+                songItems.forEach(item => {
+                    item.style.opacity = '0';
+                    setTimeout(() => {
+                        item.remove();
+                    }, 300);
+                });
+
+                // 更新元数据
+                const metaItem = document.querySelector('.meta-item:nth-child(2)');
+                metaItem.querySelector('span').textContent = '0首歌曲';
+
+                const timeMeta = document.querySelector('.meta-item:nth-child(3)');
+                timeMeta.querySelector('span').textContent = '最近更新: 刚刚';
+
+                showNotification('播放记录已清除');
+            }
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.background = 'rgba(15, 15, 35, 0.9)';
+            notification.style.color = 'white';
+            notification.style.padding = '12px 20px';
+            notification.style.borderRadius = '10px';
+            notification.style.zIndex = '10000';
+            notification.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+            notification.style.backdropFilter = 'blur(10px)';
+            notification.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // 3秒后移除通知
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+
+        // 返回首页
+        function goHome() {
+            console.log('返回首页');
+            // window.location.href = '/';
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            console.log('切换到标签:', tab);
+            // 这里可以添加切换标签页的逻辑
+        }
+    </script>
+</body>
+</html>

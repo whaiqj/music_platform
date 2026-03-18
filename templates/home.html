@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - MusicStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 - 保持与首页一致 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-breadcrumb {
+            flex: 1;
+            margin-left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .breadcrumb-item {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #4ecdc4;
+        }
+
+        .breadcrumb-item.active {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        /* 主要布局 */
+        .main-layout {
+            display: flex;
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 240px;
+            height: calc(100vh - 60px);
+            background: rgba(15, 15, 35, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 2rem 1rem;
+            position: fixed;
+            left: 0;
+            top: 60px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            margin-bottom: 0.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(78, 205, 196, 0.2));
+            color: #ffffff;
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 2rem;
+        }
+
+        /* 个人资料头部 */
+        .profile-header {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-details h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .profile-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 内容卡片 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .edit-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .edit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        /* 信息列表 */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* 设置表单 */
+        .settings-form {
+            display: none;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-form.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .file-input-label:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #4ecdc4;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* 成功消息 */
+        .success-message {
+            background: linear-gradient(45deg, rgba(46, 213, 115, 0.2), rgba(0, 210, 144, 0.2));
+            border: 1px solid rgba(46, 213, 115, 0.3);
+            color: #2ed573;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .success-message.show {
+            display: flex;
+            animation: slideDown 0.3s ease;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+            }
+
+            .profile-details h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="logo" onclick="goHome()">
+            <i class="fas fa-music"></i>
+            MusicStream
+        </div>
+
+        <div class="nav-breadcrumb">
+            <a href="{% url 'index' %}" class="breadcrumb-item" onclick="goHome()">首页</a>
+            <i class="fas fa-chevron-right"></i>
+            <span class="breadcrumb-item active">个人中心</span>
+        </div>
+
+        <div class="user-menu">
+            <div class="user-avatar">
+                <img id="nav-avatar" src="" alt="用户头像" style="display: none;">
+                <i class="fas fa-user" id="nav-avatar-icon"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="nav-section">
+                <div class="nav-title">个人中心</div>
+                <div class="nav-item active" data-tab="profile">
+                    <i class="fas fa-user"></i>
+                    个人资料
+                </div>
+                <a href="{%  url 'user' %}"><div class="nav-item" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    账户设置
+                </div></a>
+                <div class="nav-item" data-tab="security">
+                    <i class="fas fa-shield-alt"></i>
+                    安全设置
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">音乐数据</div>
+                <div class="nav-item" data-tab="history">
+                    <i class="fas fa-clock"></i>
+                    听歌记录
+                </div>
+                <div class="nav-item" data-tab="favorites">
+                    <i class="fas fa-heart"></i>
+                    我的收藏
+                </div>
+                <div class="nav-item" data-tab="playlists">
+                    <i class="fas fa-list"></i>
+                    创建的歌单
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 个人资料头部 -->
+            <section class="profile-header">
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        <img id="profile-avatar" src="{{ user.avatar }}" alt="用户头像" style="display: none;">
+                        <i class="fas fa-user" id="profile-avatar-icon"></i>
+                    </div>
+                    <div class="profile-details">
+                        <h1 id="profile-username">{{ user.username }}</h1>
+                        <div class="profile-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-id-card"></i>
+                                <span>ID: <span id="user-id">{{ user.id }}</span></span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-envelope"></i>
+                                <span id="user-email">{{ user.email}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 统计数据 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">收藏的歌曲</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">23</div>
+                    <div class="stat-label">创建的歌单</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,234</div>
+                    <div class="stat-label">播放时长(小时)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">89</div>
+                    <div class="stat-label">关注的艺术家</div>
+                </div>
+            </div>
+
+            <!-- 内容卡片 -->
+            <div class="content-grid">
+                <!-- 基本信息卡片 -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-user-circle"></i>
+                            基本信息
+                        </div>
+                        <button class="edit-button" onclick="toggleSettings('basic')">
+                            <i class="fas fa-edit"></i>
+                            编辑
+                        </button>
+                    </div>
+
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">用户名</span>
+                            <span class="info-value" id="display-username">音乐爱好者</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">邮箱地址</span>
+                            <span class="info-value" id="display-email">user@example.com</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">用户ID</span>
+                            <span class="info-value" id="display-user-id">MS001234</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">注册日期</span>
+                            <span class="info-value" id="display-register-date">2024年1月15日</span>
+                        </div>
+                    </div>
+
+                    <!-- 基本信息编辑表单 -->
+                    <div class="settings-form" id="basic-settings">
+                        <div class="success-message" id="basic-success">
+                            <i class="fas fa-check-circle"></i>
+                            基本信息更新成功！
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-input" id="edit-username" placeholder="输入新的用户名">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">邮箱地址</label>
+                            <input type="email" class="form-input" id="edit-email" placeholder="输入新的邮箱地址">
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-secondary" onclick="cancelEdit('basic')">取消</button>
+                            <button class="btn-primary" onclick="saveBasicInfo()">保存更改</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 头像设置卡片 -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-image"></i>
+                            头像设置
+                        </div>
+                        <button class="edit-button" onclick="toggleSettings('avatar')">
+                            <i class="fas fa-camera"></i>
+                            更换
+                        </button>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div class="profile-avatar" style="margin: 0 auto 1rem auto;">
+                            <img id="current-avatar" src="" alt="当前头像" style="display: none;">
+                            <i class="fas fa-user" id="current-avatar-icon"></i>
+                        </div>
+                        <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">
+                            支持 JPG、PNG 格式，文件大小不超过 2MB
+                        </p>
+                    </div>
+
+                    <!-- 头像编辑表单 -->
+                    <div class="settings-form" id="avatar-settings">
+                        <div class="success-message" id="avatar-success">
+                            <i class="fas fa-check-circle"></i>
+                            头像更新成功！
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">选择新头像</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" class="file-input" id="avatar-upload" accept="image/*">
+                                <label for="avatar-upload" class="file-input-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    点击选择图片文件
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-secondary" onclick="cancelEdit('avatar')">取消</button>
+                            <button class="btn-primary" onclick="saveAvatar()">保存更改</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 安全设置卡片 -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-lock"></i>
+                            安全设置
+                        </div>
+                        <button class="edit-button" onclick="toggleSettings('security')">
+                            <i class="fas fa-key"></i>
+                            修改
+                        </button>
+                    </div>
+
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">登录密码</span>
+                            <span class="info-value">••••••••</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">最后登录</span>
+                            <span class="info-value">2024年9月4日 14:30</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">安全等级</span>
+                            <span class="info-value" style="color: #4ecdc4;">中等</span>
+                        </div>
+                    </div>
+
+                    <!-- 安全设置编辑表单 -->
+                    <div class="settings-form" id="security-settings">
+                        <div class="success-message" id="security-success">
+                            <i class="fas fa-check-circle"></i>
+                            密码修改成功！
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">当前密码</label>
+                            <input type="password" class="form-input" id="current-password" placeholder="输入当前密码">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">新密码</label>
+                            <input type="password" class="form-input" id="new-password" placeholder="输入新密码">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">确认新密码</label>
+                            <input type="password" class="form-input" id="confirm-password" placeholder="再次输入新密码">
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-secondary" onclick="cancelEdit('security')">取消</button>
+                            <button class="btn-primary" onclick="savePassword()">保存更改</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 偏好设置卡片 -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-sliders-h"></i>
+                            偏好设置
+                        </div>
+                        <button class="edit-button" onclick="toggleSettings('preferences')">
+                            <i class="fas fa-edit"></i>
+                            编辑
+                        </button>
+                    </div>
+
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">音质偏好</span>
+                            <span class="info-value">高品质</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

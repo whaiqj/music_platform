@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行榜 - MusicStream</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 - 保持与之前文件一致 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-breadcrumb {
+            flex: 1;
+            margin-left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .breadcrumb-item {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #4ecdc4;
+        }
+
+        .breadcrumb-item.active {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            padding: 2rem;
+            margin-top: 60px;
+        }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 分类导航 */
+        .category-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-item {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-item:hover,
+        .category-item.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+
+        /* 统一的排行榜列表样式 */
+        .chart-list {
+            margin-bottom: 3rem;
+        }
+
+        .chart-list-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .chart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chart-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chart-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 排行榜序号 */
+        .rank {
+            font-size: 2rem;
+            font-weight: 900;
+            width: 50px;
+            text-align: center;
+            margin-right: 1.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 特别为前三名设置更大的字体 */
+        .rank.top-rank {
+            font-size: 2.5rem;
+        }
+
+        .song-cover {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin-right: 1rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .song-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .song-info {
+            flex-grow: 1;
+        }
+
+        .song-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .song-artist {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .song-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .play-button, .action-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .action-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* 热搜歌曲区域 */
+        .hot-searches {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .hot-search-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hot-search-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .hot-search-rank {
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">
+            <i class="fas fa-music"></i>
+            MusicStream
+        </div>
+        <div class="nav-breadcrumb">
+            <a href="/" class="breadcrumb-item">首页</a>
+            <i class="fas fa-chevron-right"></i>
+            <span class="breadcrumb-item active">排行榜</span>
+        </div>
+        <div class="user-menu">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="page-header">
+            <h1 class="page-title">热门排行榜</h1>
+            <p class="page-subtitle">探索不同语言、风格和周期的热门音乐</p>
+        </section>
+
+        <!-- 分类导航 -->
+        <div class="category-nav">
+
+            <div class="chart-list-title">热门分类</div>
+            {% for label in labels %}
+            <div class="category-item" data-type="{{ label.id }}">{{ label.name }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- 热搜歌曲排行榜 -->
+        <section class="chart-list">
+            <h2 class="chart-list-title">热搜歌曲排行榜</h2>
+            <div class="chart-items">
+                {% for search in searchs %}
+                <div class="chart-item">
+                    <div class="rank {% if forloop.counter <= 3 %}top-rank{% endif %}">{{ forloop.counter }}</div>
+                    <div class="song-cover">
+                        {% if search.song.img %}
+                        <img src="{{ search.song.img.url }}" alt="{{ search.song.name }}">
+                        {% else %}
+                        <i class="fas fa-music" style="font-size: 2rem; color: rgba(255,255,255,0.5);"></i>
+                        {% endif %}
+                    </div>
+                    <div class="song-info">
+                        <div class="song-title">{{ search.song.name }}</div>
+                        <div class="song-artist">{{ search.song.singer }}</div>
+                    </div>
+                    <div class="song-actions">
+                        <button class="play-button"
+                                onclick="playSong('{{ search.song.file.url }}', '{{ search.song.name }}', '{{ search.song.singer }}', '{% if search.song.img %}{{ search.song.img.url }}{% endif %}', '{{ search.song.id }}')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="action-button">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 分类筛选功能
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // 更新激活状态
+                document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                // 获取分类类型
+                const type = this.getAttribute('data-type');
+
+                // 重新加载页面，传递分类参数
+                const url = new URL(window.location);
+                if (type) {
+                    url.searchParams.set('type', type);
+                } else {
+                    url.searchParams.delete('type');
+                }
+                window.location.href = url.toString();
+            });
+        });
+
+        // 播放歌曲功能（简化版）
+        function playSong(songUrl, title, artist, imgSrc, songId) {
+            if (songUrl) {
+                // 创建audio元素播放音乐
+                const audio = new Audio(songUrl);
+                audio.play()
+                    .then(() => {
+                        console.log('正在播放:', title);
+                        // 这里可以集成完整的播放器功能
+                    })
+                    .catch(error => {
+                        console.error('播放失败:', error);
+                        alert('播放失败，请稍后重试');
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
